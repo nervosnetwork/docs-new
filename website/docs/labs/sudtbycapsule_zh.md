@@ -1,58 +1,58 @@
 ---
-id: sudtbycapsule
-title: Write a SUDT script by Capsule
+id: sudtbycapsule_zh
+title: 使用 Capsule 编写 SUDT 脚本
 ---
 
-## Introduction
+## 介绍
 
-[Capsule](https://github.com/nervosnetwork/capsule) is a set of tools for Rust developers to develop scripts on CKB which covers the entire lifecycle of script development: writing,debugging,testing and deployment. We aim to improve the development experience of Rust developers.
+[Capsule](https://github.com/nervosnetwork/capsule) 是一套供 Rust 开发者在 CKB 上开发脚本的工具，它涵盖了脚本开发的整个生命周期：编写、调试、测试和部署。我们的目标是改善 Rust 开发者的开发体验。
 
-In this tutorial, you will learn how to write a SUDT script using Capsule. SUDT is the abbreviation of Simple User Defined Token which defines a minimal standard that contains what’s absolutely needed for dapp developers to issue custom tokens on Nervos CKB. You can refer to [RFC: Simple UDT Draft Spec](https://talk.nervos.org/t/rfc-simple-udt-draft-spec/4333) for more details.
+在本教程中，你将学习如何使用 Capsule 编写一个 SUDT 脚本。SUDT 是简单用户自定义代币（Simple User Defined Token）的缩写，它定义了一个最小的标准，包含了 dapp 开发者在 Nervos CKB 上发行自定义代币的刚需。你可以参考 [RFC: Simple UDT Draft Spec](https://talk.nervos.org/t/rfc-simple-udt-draft-spec/4333) 了解更多细节。
 
-We expect that:
+我们假设你：
 
-* You are Rust developers and generally familiar with software development, writing code, and running your code.
-* You are generally familiar with Nervos CKB and have completed the  [How to use a development blockchain](basics/guides/devchain.md)
-* You are open to learning about the bleeding edge of blockchain development
+* 你是 Rust 开发者，大致熟悉软件开发、编写代码、运行代码。
+* 你大致了解 Nervos CKB 并且已经自行[搭建好了 CKB 开发链](basics/guides/devchain_zh.md) 。
+* 你愿意学习区块链开发的前沿知识。
 
-If you run into an issue on this tutorial you can [create a new issue](https://github.com/nervosnetwork/capsule) or contact us on [Nervos talk](https://talk.nervos.org/) or [Discord](https://discord.gg/n6tx7uC). 
+如果你在本教程中遇到问题，可以在 [Capsule Github 库](https://github.com/nervosnetwork/capsule)提交对应 issue，或者在 [Nervos 论坛](https://talk.nervos.org/) 或 [Discord](https://discord.gg/n6tx7uC) 联系我们。
 
-What you will be doing:
+教程所涉及的：
 
-* Prepare to write the SUDT script 
-* Write a SUDT script
-* Testing
-* Deployment 
+* 编写 SUDT 脚本的事前准备
+* 正式编写一个 SUDT 脚本
+* 测试
+* 部署
 
-## Prepare to write the SUDT script
+## 编写 SUDT 脚本的事前准备
 
-### Run a dev chain and ckb-cli
+### 运行开发链和 ckb-cli
 
-You should be able to run a dev chain and know about how to use `ckb-cli` to send transactions.  If you do not, please refer to this tutorial：[How to use a development blockchain](basics/guides/devchain.md).  Please don't forget to add `ckb-cli` to the  PATH environment variable
+你应该可以自行运行一个开发链，并且知道如何使用 `ckb-cli` 来发送交易。如果你不知道，请参考本教程：[运行 CKB 开发链](basics/guides/devchain_zh.md)。 请不要忘记将 `ckb-cli` 添加到 PATH 环境变量中。 
 
-### Install capsule
+### 安装 capsule
 
-To use capsule, you need `docker`. It is recommended to install the latest version:
+要使用 capsule，你需要使用 `docker`。推荐安装最新版本：
 
-* [Install docker](https://docs.docker.com/get-docker/)
+* [安装docker](https://docs.docker.com/get-docker/)
 
-Note: The current user must have permission to manage Docker instances. (How to manage Docker as a non-root user)[https://docs.docker.com/engine/install/linux-postinstall/].
+注意：当前用户必须具备管理 Docker 实例的权限：[非 root 用户如何管理 Docker](https://docs.docker.com/engine/install/linux-postinstall/)
 
-Now you can proceed to install capsule, It is recommended to [download the binary](https://github.com/nervosnetwork/capsule/releases/tag/v0.1.3)
+现在你可以开始安装 capsule 了，推荐下载 [该二进制包](https://github.com/nervosnetwork/capsule/releases/tag/v0.1.3)；
 
-Or you can install from source:
+你也可以根据源码安装：
 
 ```
 cargo install capsule --git https://github.com/nervosnetwork/capsule.git --tag v0.1.3
 ```
 
-Then check if it works with:
+然后检查是否安装成功：
 
 ```
 capsule check
 ```
 <details>
-<summary>(click here to view response)</summary>
+<summary>(点击此处查看响应)</summary>
 ```bash
 ------------------------------
 docker    installed
@@ -62,13 +62,13 @@ ckb-cli    installed
 </details>
 
 
-### Create a project
+### 新建项目
 
 ```
 capsule new my-sudt
 ```
 <details>
-<summary>(click here to view response)</summary>
+<summary>(点击此处查看响应)</summary>
 ```bash
 New project "my-sudt"
 Created file "capsule.toml"
@@ -85,20 +85,20 @@ Done
 </details>
 
 
-You can check the project’s layout：
+你可以查看项目的目录结构：
 
 ```
 ls my-sudt
 ```
 <details>
-<summary>(click here to view response)</summary>
+<summary>(点击此处查看响应)</summary>
 ```bash
 
 build  capsule.toml  Cargo.toml  contracts  deployment.toml  migrations  README.md  tests
 ```
 </details>
 
-The default contract is under `my-sudt/contracts/my-sudt` directory which is a normal cargo project:
+默认的合约是在`my-sudt/contracts/my-sudt`目录下
 
 ```
 ls my-sudt/contracts/my-sudt
@@ -111,7 +111,7 @@ Cargo.toml  src
 ```
 </details>
 
-You can open `my-sudt/contracts/my-sudt/src/main.rs` to see some pre-generated code:
+你可以打开 `my-sudt/contracts/my-sudt/src/main.rs` 查看一些预生成代码：
 
 ``` rust
 #![no_std]
@@ -189,9 +189,9 @@ fn main() -> Result<(), Error> {
 }
 ```
 
-### Build the project
+### 项目编译
 
-Enter into the project  `my-sudt` and build it.
+进入  `my-sudt` 目录并进行编译。
 
 ```
 cd my-sudt
@@ -199,7 +199,7 @@ capsule build
 ```
 
 <details>
-<summary>(click here to view response)</summary>
+<summary>(点击此处查看响应)</summary>
 ```bash
 
 Building contract my-sudt
@@ -218,7 +218,7 @@ Done
 </details>
 
 
-You will find a new generated contract binary in the `build/debug` directory:
+你会在`build/debug`目录下找到一个新生成的二进制格式的合约。
 
 ```
 ls build/debug
@@ -232,40 +232,40 @@ my-sudt
 </details>
 
 
-You're all done? Great, let's get coding.
+好，万事具备，开始编码！
 
-## Write a SUDT script
+## 编写 SUDT 脚本
 
-SUDT scripts can be in **owner mode** and **normal mode** which include different verification rules, we should deal with that when we're coding.
+SUDT 脚本可以有 **`所有者模式 owner mode`** 和**`普通模式 normal mode`，**其中包括不同的验证规则，我们在编码前应该对这两者有所了解。
 
-* **owner mode**：If one of the transaction input has a lock script matching the SUDT script argument, the SUDT script will be in owner mode. We don’t need to perform checks, the owner can perform any operations such as issuing more SUDTs or burning SUDTs. 
-* **normal mode：**Otherwise, the SUDT script will be in normal mode. We need to ensure the sum of all inputs’ capacity is not smaller than the sum of all outputs capacity. Please note that only one type of SUDT can be issued for each unique lock script. 
+* **所有者模式 owner mode**：如果交易中的某个输入中有一个 `锁脚本（lock script）` 与SUDT 脚本参数相匹配，那么 SUDT 脚本将处于所有者模式。我们不需要执行检查，所有者可以执行任何操作，如发行更多的 SUDT 或烧毁 SUDT。
+* **普通模式 normal mode：**否则，SUDT 脚本将处于正常模式。我们需要确保所有输入容量之和不小于所有输出容量之和。请注意，每个唯一的 `锁脚本（lock script）` 只能发行出一种类型的SUDT。
 
-The script is consisted of four parts：load script、check inputs、load inputs / outputs UDT amount、error handling. We should check the used libraries before coding.
+该脚本由四部分组成：加载脚本（load script）、检查输入（check inputs）、加载输入/输出UDT量（load inputs / outputs UDT amount）、错误处理（error handling）。我们在编码前要检查已使用的库。
 
-### Check the used libraries
+### 检查已使用的库
 
-Open `contracts/my-sudt/Cargo.toml`, we already have a dependency:
+打开 `contracts/my-sudt/Cargo.toml` 文件，我们已经拥有一个依赖：
 
 ```
 [dependencies]
 ckb-std = "0.4.1"
 ```
 
-* `ckb-std` is a crate used to handling CKB syscalls.
-* `ckb-standalone-types` is a crate which re-exported as the `ckb_std::ckb_types` provides the definition of CKB structures.
+* `ckb-std` 是用于处理 CKB 系统调用（syscalls）的包。
+* `ckb-standalone-types` 是一个以 `ckb_std::ckb_types`的形式重新导出的包，它提供了 CKB 结构的定义。
 
-You may refer to [Rust libraries](https://github.com/nervosnetwork/capsule/wiki/Rust-libraries) for more useful crates. We can only use crates which supports `no-std` in scripts.
+你可以参考 [Rust 库](https://github.com/nervosnetwork/capsule/wiki/Rust-libraries) 获取更多有用的包，我们只能使用在脚本中支持 `no-std` 的包。
 
-### Load Script
+### 加载脚本（Load Script）
 
-At the beginning of the script, we need to check the SUDT’s mode, if it is owner mode, we simply skip the verification code and return `0`, which represents the verification is successful, otherwise we check the amount of UDT.
+在脚本的开头，我们需要检查一下 SUDT 的模式，如果为所有者模式，我们简单跳过验证代码直接返回 `0`表示验证成功；相反，我们则需要检查 UDT 的数量。
 
-To achieve this, we need to load `args` of the current script, which the generated code already did for us. So we just remove the unused lines from the `main` function.
+为此，我们需要加载当前脚本的 `args` 参数，生成的代码已经完成了这一步，所以我们只需要从 `main ` 函数中删除未使用到的代码行即可。
 
-In the code below, we load the current script(SUDT)'s args field, and invoke `check_owner_mode` which we have not defined yet.
+下面代码，我们加载当前脚本的 `args` 字段，然后调用 `check_owner_mode`方法（该方法我们目前尚未定义）。
 
-Notice since we are using no-std Rust, we can't directly use the `std` in the code. Instead, we need to import the `Vec` struct from the [alloc](https://doc.rust-lang.org/stable/alloc/index.html) crate, which is a rust builtin crate contains heap related structs.
+注意：因为们是使用的是 Rust no-std 模式，所以不能直接在代码中使用 `std` 。我们需要从 [alloc](https://doc.rust-lang.org/stable/alloc/index.html)  包中导入 `Vec` 结构体，这是 Rust 内置的一个包，包含 `堆 heap` 的相关数据结构。 
 
 ``` rust
 fn main() -> Result<(), Error> {
@@ -287,15 +287,15 @@ fn main() -> Result<(), Error> {
 }
 ```
 
-### Check inputs
+### 检查输入 
 
-Now we should  check the owner mode status by defining the `check_owner_mode` function：
+现在我们应该通过定义 `check_owner_mode`  函数来检查所有者模式的状态：
 
-We need to load every input's lock hash and compare it to the script's args. If we find an input's lock hash corresponds to the script's args, we are in owner mode; otherwise, we iterate all the inputs and finally got an `IndexOutOfBound` error, which means we are in normal mode.
+我们需要加载所有输入的 `lock hash`，然后跟脚本参数进行比较。如果我们有一个输入的 `lock hash` 匹配得上脚本参数，那么就是所有者模式。防止，如果我们遍历了所有输入，最后得到了 `IndexOutOfBound` 错误，则表示为正常模式。 
 
-We use [load_cell_lock_hash](https://nervosnetwork.github.io/ckb-std/riscv64imac-unknown-none-elf/doc/ckb_std/high_level/fn.load_cell_lock_hash.html) to load cell's lock hash from CKB. The `Source::Input` and `i` args denote we load `input` from `i-th` inputs.
+我们使用 [load_cell_lock_hash](https://nervosnetwork.github.io/ckb-std/riscv64imac-unknown-none-elf/doc/ckb_std/high_level/fn.load_cell_lock_hash.html) 来从 CKB 中加载 Cells 的 `lock hash` 。其中 `Source::Input` 和`i` 参数表示我们从`i-th` 输入中加载输入。
 
-The error `SysError::IndexOutOfBound` represents that we request an index that does not exist, which means we cannot find a matched input cell, so we return `Ok(false)`.
+错误 `SysError::IndexOutOfBound` 表示我们请求的索引不存在，即我们无法找到匹配的输入 Cell，所以我们返回  `Ok(false)`。
 
 ``` rust
 use ckb_std::{
@@ -304,7 +304,7 @@ use ckb_std::{
 };
 
 fn check_owner_mode(args: &Bytes) -> Result<bool, Error> {
-    // With owner lock script extracted, we will look through each input in the
+    // With owner 锁脚本（lock script） extracted, we will look through each input in the
     // current transaction to see if any unlocked cell uses owner lock.
     for i in 0.. {
         // check input's lock_hash with script args
@@ -325,23 +325,21 @@ fn check_owner_mode(args: &Bytes) -> Result<bool, Error> {
 }
 ```
 
-### Load inputs / outputs UDT amount
+### Load inputs / outputs UDT amount 加载输入/输出的 UDT 数量
 
-If the owner mode is `false`, we should continue the verification: check the total input SUDT amount is greater than or equals to the total output SUDT amount.
+如果不是处于所有者模式，我们就应该继续进行验证：检查输入的总 SUDT 数量大于或等于输出的总 SUDT 数量。
 
-* Define two methods:
-    *  `collect_inputs_amount` ：collect total input SUDT amount
-    * `collect_outputs_amount` ：collect total output SUDT amount.
+* 定义两个方法：
+    *  `collect_inputs_amount` ：获取输入的总 SUDT 数量
+    *  `collect_outputs_amount` ：获取输出的总SUDT 数量
+* 因为我们的目的是读取当前脚本（SUDT）类型的所有 SUDT，所以我们可以使用 `Source::GroupInput` ，此处不使用  `Source::Input`。
+* `Source::GroupInput` 和`i`   表示从 “输入组” 中加载 `i-th` 输入。 
 
-* Since we aim to read all SUDT inputs which type is the current script(SUDT), we  can use `Source::GroupInput` instead of  `Source::Input`.
+小提醒：
 
-*  `Source::GroupInput` and `i`   means load the `i-th` input from the "input group". 
-
-Tips：
-
-*  By using `Source::GroupInput`  in the syscall, CKB verification engine will automatically group the inputs/outputs by `lock` and `type` script.
-* The data type of SUDT is  `u128`, which is 16 bytes so we use the 16 bytes buffer.
-*  `i-th` input of `Source::Input`(index of all inputs) may be or may not be the same cell of the `i-th` input of `Source::GroupInput` (index of inputs which lock/type is the current script).
+*  在系统调用中使用 `Source::GroupInput` ，CKB 验证引擎会自动按 `锁脚本（lock script）` 和 `类型脚本（type script） `  对输入/输出 Cells 进行分组。
+*  SUDT 的数据类型是 `u128`，为 16 字节，所以我们使用 16 字节缓存。
+*   `Source::Input`（所有输入的索引） 的 `i-th` 输入跟 `Source::GroupInput` （lock 或者 type 脚本是当前脚本的输入的索引）的 `i-th` 输入可能是相同的 Cell，也可能不是。
 
 ``` rust
 const UDT_LEN: usize = 16;
@@ -370,7 +368,7 @@ fn collect_inputs_amount() -> Result<u128, Error> {
 }
 ```
 
-The `collect_outputs_amount` function is similar, except we load data from outputs:
+ `collect_outputs_amount` 方法也类似，只不过是从输出中加载数据：
 
 ``` rust
 fn collect_outputs_amount() -> Result<u128, Error> {
@@ -398,7 +396,7 @@ fn collect_outputs_amount() -> Result<u128, Error> {
 }
 ```
 
-* Update the `main` function to check inputs / outputs UDT amount:
+* 更新`main` 方法检查输入输出的 UDT 数量：
 
 ``` rust
 /// Error
@@ -431,17 +429,17 @@ fn main() -> Result<(), Error> {
 }
 ```
 
-### Use Iterator to query cells
+### 使用迭代器查询 Cells
 
-In the previous code, we use `for` loop to iterate inputs and outputs, since iteration over cells is a common pattern in CKB programming, `ckb-std` provides a high-level interface [QueryIter](https://nervosnetwork.github.io/ckb-std/riscv64imac-unknown-none-elf/doc/ckb_std/high_level/struct.QueryIter.html) to handle it.
+在上文代码中，我们使用 `for` 循环来遍历输入输出，由于对 Cells 进行遍历是 CKB 编程中的常见模式，所以 `ckb-std` 提供了一个高级接口 [QueryIter](https://nervosnetwork.github.io/ckb-std/riscv64imac-unknown-none-elf/doc/ckb_std/high_level/struct.QueryIter.html) 来处理它。
 
-QueryIter needs two args, the first is a loading function, the seconds is `Source`. This is an example to load all grouped inputs cells data `QueryIter::new(load_cell_data, Source::GroupInput)`.
+QueryIter 需要两个参数，第一个是一个加载函数，第二个是 `Source`。我们看看一个加载所有已分组输入 Cells 数据的例子： `QueryIter::new(load_cell_data, Source::GroupInput)`。
 
-Rewrite our functions:
+重写我们的方法:
 
 ``` rust
 fn check_owner_mode(args: &Bytes) -> Result<bool, Error> {
-    // With owner lock script extracted, we will look through each input in the
+    // With owner 锁脚本（lock script） extracted, we will look through each input in the
     // current transaction to see if any unlocked cell uses owner lock.
     let is_owner_mode = QueryIter::new(load_cell_lock_hash, Source::Input)
         .find(|lock_hash| args[..] == lock_hash[..]).is_some();
@@ -486,25 +484,22 @@ fn collect_outputs_amount() -> Result<u128, Error> {
 
 ```
 
+现在我们已经完成了 SUDT 脚本，你可以参考[查看完整代码](https://github.com/jjyr/my-sudt/blob/master/contracts/my-sudt/src/main.rs) 。如果你感兴趣的话，也可以查看用[C 语言编写 SUDT 脚本](https://github.com/nervosnetwork/ckb-miscellaneous-scripts/blob/master/c/simple_udt.c) 。
 
-Now we have finished the SUDT script, you may refer to [Full code of my-sudt](https://github.com/jjyr/my-sudt/blob/master/contracts/my-sudt/src/main.rs) to check the full script code. If you are interested, you may also check [the SUDT script written in C](https://github.com/nervosnetwork/ckb-miscellaneous-scripts/blob/master/c/simple_udt.c).
+### 编译项目
 
-
-### Build the project
-
-Run `capsule build` under the project directory to build the script.If no error occurred, we can find the script binary at `my-usdt/build/debug/my-sudt`. 
+在项目目录中执行 `capsule build` 编译脚本。如果没有报错的话，我们就可以在 `my-usdt/build/debug/my-sudt` 目录下看到脚本二进制文件。
 
 
-## Testing
+## 测试
 
-We will use the `ckb-testtool` crate to construct transactions and context for our testing.
+我们可以使用 `ckb-testtool` 包来打造方便我们测试的交易和环境。
 
-### Check the default tests
+### 查看默认测试用例
 
-When create the project `my-sudt`,`capsule`  have generated the default tests.The default tests create mock cells and unlock them for testing.
+当创建 `my-sudt` 项目时，`capsule` 会生成默认测试用例。默认测试用例会创建模拟的 Cells 并解锁，方便我们测试。
 
-Use  `capsule build` under the project directory to build the script, 
-then use `capsule test` to run the default tests.We will find the error message:
+在项目目录中执行 `capsule build` 编译脚本，然后执行 `capsule test`  运行默认测试用例，我们会看到如下错误信息：
 
 ```
 failures:
@@ -518,11 +513,11 @@ failures:
     tests::test_basic
 ```
 
-The error number `4` in `Error { kind: ValidationFailure(4)`  refers to `Error::Encoding`, which means the cell’s data type is not `u128`. 
+在 `Error { kind: ValidationFailure(4)`  中的数字 `4` 表示  `Error::Encoding`，即 Cells 的数据类型非  `u128`。
 
-Let’s check the default tests code  `tests/src/tests.rs`  to find out how to write the tests, then we can write new tests adapted `my-sudt`：
+我们检查默认测试代码 `tests/src/tests.rs` 了解如何编写测试用例，然后编写适合 `my-sudt` 的测试用例：
 
-* In the beginning part, initialize the  `Context` which is a structure to simulate the chain environment. We can use `Context` to deploy exists cells and mock block headers.`deploy_contract` will return the  `out_point` of the script.
+* 开头，初始化 `Context` ，用于模拟链上环境。 我们可以使用 `Context` 来部署现存的 Cells 和模拟的区块头。`deploy_contract` 会返回脚本的   `out_point` 。
 
 ``` rust
 // deploy contract
@@ -531,9 +526,9 @@ Let’s check the default tests code  `tests/src/tests.rs`  to find out how to w
     let contract_out_point = context.deploy_contract(contract_bin);
 ```
 
-* Then `build_script` is called with the script's `out_point` , this function returns the `Script` which uses our script as the code. `create_cell` creates an existing cell in the context, which uses our script as the `lock_script`.
+* 然后， 带脚本的 `out_point` 参数调用 `build_script` 方法，该方法返回 `Script` ，其将我们的脚本用作为代码。 `create_cell` 创建了一个已存在的 Cell，该 Cell 将我们的脚本用作为 `锁脚本（lock script）`。
 
-*Please note the default tests assume the script is a lock_script, but in our case, `my-sudt` is a type_script. We'll fix it later.*
+*请注意默认测试用例假设脚本是 `锁脚本（lock script）`，但在本例子中，我们的脚本 `my-sudt `是 `类型脚本（type script）` ，后续我们将修复这一点*
 
 ``` rust
 // prepare scripts
@@ -553,9 +548,9 @@ Let’s check the default tests code  `tests/src/tests.rs`  to find out how to w
         .build();
 ```
 
-* After that, build two outputs cells and a transaction structure.It is necessary to include  `cell_deps` field in the transaction which should contain all the referenced scripts, in this case, we can only refer to `my-sudt`.  `complete_tx`  also implement `cell_deps`, while the field is already completed manually, this line is not necessary.
+* 之后，构建两个输出 Cells 和一个交易结构。交易中需要包含 `cell_deps` 字段，该字段包含所有引用的脚本，在我们的例子中，我们只需要引用 `my-sudt`。`complete_tx` 也实现了 `cell_deps`，不过该字段已经手动实现了，所以这一行就没有必要了。
 
-Please note that the  transaction's `outputs_data` must have the same length with the `outputs`, even the data is empty.
+请注意交易的 `outputs_data` 必须跟 `outputs` 具有相同的长度。即使数据为空。
 
 ``` rust
 let outputs = vec![
@@ -581,7 +576,7 @@ let outputs = vec![
     let tx = context.complete_tx(tx);
 ```
 
-* Finally, verify the transaction:
+* 最后，验证交易：
 
 ```
 // run
@@ -590,10 +585,9 @@ let outputs = vec![
         .expect("pass verification");
 ```
 
-### Write new tests
+### Write new tests 编写新的测试用例
 
-We should create mock SUDT cells and spend them for testing SUDT verification.
-As `my-sudt` script is a `type_script` we need another script as `lock_script` for mock cells, it is recommended to use `always success` script returned `0`. `always success` is built-in in the `ckb-testtool`.
+我们应该创建模拟的 SUDT Cells 然后在测试 SUDT 验证时花费掉它们。因为我们的 `my-sudt` 脚本是一个 `type_script` ，所以我们需要另一个脚本作为 `锁脚本（lock script）` 用于模拟 Cells，我们推荐使用 `always success` 脚本返回 `0`。 `always success`  内置在 `ckb-testtool`中。 
 
 
 ``` rust
@@ -603,20 +597,20 @@ use ckb_testtool::{builtin::ALWAYS_SUCCESS, context::Context};
     let always_success_out_point = context.deploy_contract(ALWAYS_SUCCESS.clone());
 ```
 
-Before writing the code, let's think about our  test cases:
+在开始编写代码前，我们再整理一下测试用例要点：
 
-1. Return success when inputs capacity equals to outputs capacity.
-2. Return success when inputs capacity is greater than outputs capacity.
-3. Return failure when inputs capacity is less than outputs capacity.
-4. Return success when inputs capacity is less than outputs token with `owner mode` activated.
+1. 当输入容量等于输出容量时，返回成功。
+2. 当输入容量大于输出容量时，返回成功。
+3. 当初入容量小于输出容量时，返回失败。
+4. 在所有者模式下，当输入容量小于输出代币时，返回成功。
 
-* Define `build_test_context` to build transactions. There are three args: 
-    * The data type of  `inputs_token` and `outputs_token`  is  `u128`. The function can generate SUDT inputs cells and outputs cells according to the two args.
-    *  `is_owner_mode` refers to the current transaction is in SUDT owner mode or normal mode.
+* 定义`build_test_context` 来构建交易，有三个参数： 
+    *  `inputs_token` 和 `outputs_token` 的数据类型是 `u128`。该方法可以根据这两个参数生成 SUDT 输入 Cells 和输出 Cells。
+    * `is_owner_mode` 表示当前交易在 SUDT 中是所有者模式还是正常模式。
 
-* Deploy the SUDT and `always-success` scripts.
+* 部署 SUDT 和 `always-success` 脚本。
 
-Please note that if `is_owner_mode` is true, we will set `lock_script`'s `lock_hash` as `owner script hash`; otherwise, we will set `[0u8; 32]` which implies can't enter into owner mode.
+请注意，如果处于所有者模式，我们就需要将 `锁脚本（lock script）` 的 `lock hash` 设置为 `所有者脚本的哈希`; 否则，我们将会设置 `[0u8; 32]` ，表示不能进入所有者模式。
 
 ``` rust
 fn build_test_context(
@@ -631,7 +625,7 @@ fn build_test_context(
     // deploy always_success script
     let always_success_out_point = context.deploy_contract(ALWAYS_SUCCESS.clone());
 
-    // build lock script
+    // build 锁脚本（lock script）
     let lock_script = context
         .build_script(&always_success_out_point, Default::default())
         .expect("script");
@@ -658,7 +652,7 @@ fn build_test_context(
 //}
 ```
 
-* Build inputs and outputs according to the `inputs_token` and `outputs_token` 
+* 根据 `inputs_token` 和 `outputs_token` 构建输入输出。
 
 ``` rust
 // ...
@@ -696,7 +690,7 @@ fn build_test_context(
     // ...
 ```
 
-*  Finally construct the transaction and return it with context.
+*  最后构建交易，然后跟上下文一起返回。
 
 ```
 // build transaction
@@ -710,7 +704,7 @@ fn build_test_context(
     (context, tx)
 ```
 
-Now the helper function `build_test_context` is finished, we can write our tests: 
+现在 `build_test_context` 已完成，我们开始编写测试：
 
 ``` rust
 #[test]
@@ -759,28 +753,29 @@ fn test_create_sudt_with_owner_mode() {
 
 You may refer to [my-sudt tests](https://github.com/jjyr/my-sudt/blob/master/tests/src/tests.rs) for the full tests. Run `capsule test`  all tests will be passed.
 
-## Deployment
+你可以参考 [my-sudt tests](https://github.com/jjyr/my-sudt/blob/master/tests/src/tests.rs) 了解完整测试。运行 `capsule test`  所有测试都将通过。
 
-### Run a dev chain and ckb-cli
+## 部署
 
-You should be running a dev chain and know about how to use `ckb-cli` to send transactions before deployment. 
+### 运行开发链和 ckb-cli
 
-### Deploy
+在部署之前，你应该运行一条开发链，并且知道如何使用 `ckb-cli` 进行发送交易。
 
-1. Update the deployment configurations
+### 部署
 
-   Open  `deployment.toml` :
+1. 更新部署配置文件
 
-     *  `cells`  describes which cells to be deployed.
+   打开  `deployment.toml` :
 
-        * `name`: Define the reference name used in the deployment configuration.
-        * `enable_type_id` : If it is set to `true` means create a `type_id` for the cell.
-        * `location` :  Define the script binary path.
+     *  `cells`  描述哪些 Cells 将会部署
+        * `name`：定义部署配置中使用的参考名称。
+        * `enable_type_id` : 如果设置为 `true` ，则会为 Cell 创建一个 `type_id` 。
+        * `location` :  脚本二进制文件的位置。
 
-     *  `dep_groups`  describes which dep_groups to be created. Dep Group is a cell which bundles several cells as its members. When a dep group cell is used in `cell_deps`, it has the same effect as adding all its members into `cell_deps`. In our case, we don’t need `dep_groups`.
-     * `lock`  describes the `lock` field of the new deployed cells.It is  recommended to set `lock` to the deployer's address(an address that you can unlock) in the dev chain and in the testnet, which is easier to update the script.
+     *  `dep_groups`  描述创建哪个 dep_groups。Dep Group  是一个绑定多 Cells 作为它的成员的 Cell。当在 `cell_deps` 中使用 dep group cell 时，跟将其所有成员添加到 `cell_deps` 的效果一样。在本例子汇总，我们不需要 `dep_groups`。
+     *  `lock`  描述了新部署的 Cells 的 `lock` 字段。推荐将 `lock` 设置为开发链或者测试链上开发者的地址（或者你能够解锁的地址），这样易于更新。
 
-2. Uncomment the configuration file and replace the cell name and location with `my-sudt`.
+2. 解注释配置文件，用 `my-sudt`的属性替换 Cell `name` 和 `location `。
 
 ```
 # [[cells]]
@@ -804,24 +799,24 @@ You should be running a dev chain and know about how to use `ckb-cli` to send tr
 # hash_type = "type"
 ```
 
-3. Build release version of the script
-  
-  * The release version of script  doesn’t  include debug symbols which makes the size smaller.
+3. 编译发布版脚本
+
+  * 发布版脚本不包含相关调试符号，所以文件可以更小点
 
 ```
 capsule build --release
 ```
 
-4. Deploy the script 
+4. 部署脚本
 
 ```
 capsule deploy --address <ckt1....>
 ```
 
-If the `ckb-cli` has been installed and dev-chain RPC is connectable, you will see the `deployment plan`:
+如果 `ckb-cli` 已经安装并且开发链 RPC 已可连接，你便可以看到 `deployment plan`：
 
-* `new_occupied_capacity` and `total_occupied_capacity`  refer how much CKB to store cells and data.
-* `txs_fee_capacity` refers how much CKB to pay the transaction fee.
+* `new_occupied_capacity` 和`total_occupied_capacity`  指多少 CKB 代币用于存储 Cells 和数据。
+* `txs_fee_capacity` 指多少 CKB 代币用于支付费用。
 
 ```
 Deployment plan:
@@ -842,7 +837,7 @@ recipe:
 Confirm deployment? (Yes/No)
 ```
 
-5. Type `yes` or `y`  and input the password to unlock the account.
+5. Type `yes` or `y`  and input the password to unlock the account. 输入 `yes` 或 `y` ，然后输入密码解锁账户。
 
 ```
 send cell_tx 8b496cb19018c475cdc4605ee9cef83cbfe578dce4f81f3367395906eba52c29
@@ -851,16 +846,19 @@ Deployment complete
 
 Now the SUDT script has been deployed, you can refer to this script by using `tx_hash: 0xaa3d472025e6afefdf3f65c5f9beefd206b4283b30551baef83cbb4762e6d397 index: 0` as `out_point`(your `tx_hash` should be another value).
 
-### Migration
+现在 SUDT 脚本部署完成，你可以引用通过使用 `tx_hash: 0xaa3d472025e6afefdf3f65c5f9beefd206b4283b30551baef83cbb4762e6d397 index: 0`  作为`out_point` 来引用该脚本（你的 `tx_hash` 应该为其他值，这个为例子的值）。	
 
-If you want to update the script code and deploy again, you can simply run this command again:
+### 迁移
+
+如果你想要更新脚本代码然后再次发布，你只需要再次执行这个命令：
 
 ```
 capsule deploy --address ckt1qyq075y5ctzlgahu8pgsqxrqnglajgwa9zksmqdupd
 ```
 
-The new script will be automatically migrated which means destroy the old script cells and create new cells.
-You will find  `new_occupied_capacity` is `0` because `capacity` is already covered by the old script cells.Please don’t forget the transaction fee you still need to pay it.
+新的脚本会自动迁移，旧脚本 Cells 会被销毁然后创建出新的 Cells。
+
+你会发现 `new_occupied_capacity` 为 `0`，因为容量已经被旧脚本 Cells 覆盖了，请不要忘记你还需要支付交易费用。
 
 ```
 Deployment plan:
@@ -881,6 +879,7 @@ recipe:
 Confirm deployment? (Yes/No)
 ```
 
-## Next Steps
+## 后续
 
-This is the end of our journey into writing a SUDT script by Capsule. We have launched the [Nervos Grants Program](https://www.nervos.org/grants/) and [CKLabs](https://medium.com/nervosnetwork/introducing-cklabs-the-nervos-incubator-3e5a2c443c7c) to empower innovation and development and support the growth of a diverse and thriving ecosystem. We can't wait to see what you build next!
+使用 Capsule 编写 SUDT 脚本的教程就到这里了。我们已经启动了 [Nervos Grants Program](https://www.nervos.org/grants/) 和[CKLabs](https://medium.com/nervosnetwork/introducing-cklabs-the-nervos-incubator-3e5a2c443c7c)以促进创新和发展，支持多样化和繁荣的生态系统的增长。欢迎来 Nervos CKB 生态开发构建！
+
